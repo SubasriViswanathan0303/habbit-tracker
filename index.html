@@ -1,0 +1,1491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2f7d5b">
+<title>My Healthy Lifestyle – Couple Habit Tracker</title>
+<style>
+  :root {
+    --bg: #f4f8f5;
+    --card: #ffffff;
+    --text: #1f2d26;
+    --muted: #66766d;
+    --accent: #2f7d5b;
+    --accent-soft: #dcefe4;
+    --border: #dbe6df;
+    --today: #f2a93b;
+    --a: #2f7d5b;
+    --b: #5b6fd6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121a16;
+      --card: #1b2621;
+      --text: #e6efe9;
+      --muted: #93a79b;
+      --accent: #4cb386;
+      --accent-soft: #23372d;
+      --border: #2b3a32;
+      --a: #4cb386;
+      --b: #8a9bf0;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 14px; }
+  header { text-align: center; padding: 6px 0 2px; }
+  header h1 { margin: 0; font-size: 1.5rem; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: .88rem; }
+
+  button {
+    font: inherit; font-weight: 600; cursor: pointer;
+    padding: 9px 16px; border-radius: 10px;
+    border: 1px solid var(--accent); background: transparent; color: var(--accent);
+  }
+  button:hover { background: var(--accent); color: #fff; }
+  button.solid { background: var(--accent); color: #fff; }
+  button.small { padding: 4px 12px; font-size: .8rem; font-weight: 500; }
+  button:disabled { opacity: .3; cursor: default; background: transparent; color: var(--accent); }
+
+  .tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 12px 0 4px; }
+  .tab {
+    padding: 9px 18px; border-radius: 99px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); font-weight: 600; font-size: .95rem;
+  }
+  .tab:hover { background: var(--accent-soft); color: var(--text); }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .rename { text-align: center; margin: 6px 0 0; }
+
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--accent-soft); padding: 4px; border-radius: 12px; margin: 12px 0; }
+  .seg button { border: none; padding: 8px 0; color: var(--text); font-size: .92rem; }
+  .seg button:hover { background: var(--card); color: var(--text); }
+  .seg button.active { background: var(--card); color: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 14px; margin: 12px 0;
+  }
+  .top { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 4px; }
+  .top .pct { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+  .top .count { color: var(--muted); font-size: .88rem; }
+  .bar { height: 9px; background: var(--accent-soft); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .bar > div { height: 100%; background: var(--accent); transition: width .3s; }
+  .awards-line { margin-top: 8px; font-size: .9rem; color: var(--muted); }
+  .awards-line strong { color: var(--text); }
+  h3.sec { margin: 18px 4px 6px; font-size: 1rem; }
+
+  /* Week strip */
+  .strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 12px 0; }
+  .chip {
+    padding: 7px 0; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); font-size: .8rem; font-weight: 700;
+    display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1.15;
+  }
+  .chip small { font-weight: 500; color: var(--muted); font-size: .68rem; }
+  .chip:hover { background: var(--accent-soft); color: var(--text); }
+  .chip.today { border-color: var(--today); border-width: 2px; }
+  .chip.star { background: rgba(242,169,59,.18); }
+  .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .chip.active small { color: #e9f6ef; }
+
+  /* Single day card */
+  .daycard { overflow: hidden; touch-action: pan-y; }
+  .daycard.from-right { animation: inRight .25s ease-out; }
+  .daycard.from-left { animation: inLeft .25s ease-out; }
+  @keyframes inRight { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes inLeft { from { transform: translateX(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .dayhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .dayhead h2 { margin: 0; font-size: 1.25rem; text-align: center; flex: 1; }
+  .dayhead h2 small { display: block; font-size: .8rem; font-weight: 500; color: var(--muted); }
+  .nav { padding: 4px 14px; font-size: 1.3rem; line-height: 1; }
+  .today-tag {
+    font-size: .68rem; font-weight: 700; color: #7a4d00; background: var(--today);
+    padding: 1px 8px; border-radius: 99px; margin-left: 6px; vertical-align: middle;
+  }
+  .daynote { text-align: center; font-size: .85rem; color: var(--b); font-weight: 600; margin-top: 2px; }
+  .dayaward { text-align: center; font-size: .95rem; font-weight: 700; color: #b5760a; min-height: 1.4em; margin: 6px 0 2px; }
+  .hint { text-align: center; color: var(--muted); font-size: .78rem; margin: 8px 0 0; }
+
+  .habit {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 8px; border-radius: 12px; cursor: pointer;
+    font-size: 1rem; user-select: none; border-bottom: 1px solid var(--border);
+  }
+  .habit:last-of-type { border-bottom: none; }
+  .habit:hover { background: var(--accent-soft); }
+  .habit.locked { opacity: .55; cursor: default; }
+  .habit input { width: 24px; height: 24px; accent-color: var(--accent); flex: none; cursor: pointer; }
+  .habit .ico { font-size: 1.3rem; width: 1.6rem; text-align: center; flex: none; }
+  .habit.done .nm { text-decoration: line-through; color: var(--muted); }
+  .empty { text-align: center; color: var(--muted); padding: 24px 8px; }
+
+  /* Awards */
+  .cert { border-radius: 18px; padding: 16px; text-align: center; margin: 12px 0; border: 2px solid transparent; }
+  .cert .c-ico { font-size: 3rem; line-height: 1; }
+  .cert .c-t { font-weight: 800; font-size: 1.15rem; margin-top: 4px; letter-spacing: .3px; }
+  .cert .c-n { font-size: 1.6rem; font-weight: 800; margin: 2px 0; }
+  .cert .c-s { font-size: .85rem; opacity: .85; }
+  .cert .c-more { font-size: .82rem; margin-top: 8px; font-weight: 600; }
+  .cert.silver { background: linear-gradient(135deg, #eef1f4, #b8c1ca); color: #26323c; border-color: #aab4bd; }
+  .cert.gold   { background: linear-gradient(135deg, #fff4c2, #f2c230); color: #54400a; border-color: #d9a91a; }
+  .cert.plat   { background: linear-gradient(135deg, #e3f5ff, #a8c4ff 50%, #dcbcff); color: #282c68; border-color: #8d9bf0; }
+  .cert.none   { background: var(--card); color: var(--muted); border: 2px dashed var(--border); }
+  .cert.couple { background: linear-gradient(135deg, #ffe3ee, #ffc2d8); color: #6b1b3d; border-color: #f08ab0; }
+  .cert.none .c-n { color: var(--text); font-size: 1.1rem; }
+  .certs { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .certs .cert { margin: 0; }
+
+  /* Week nav / rows */
+  .wknav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 0; }
+  .wknav div { text-align: center; font-weight: 700; flex: 1; }
+  .wknav small { display: block; font-weight: 500; color: var(--muted); font-size: .78rem; }
+  .wkrow { display: grid; grid-template-columns: 70px 1fr 52px 26px; gap: 8px; align-items: center; padding: 9px 4px; border-bottom: 1px solid var(--border); cursor: pointer; font-size: .9rem; }
+  .wkrow:last-child { border-bottom: none; }
+  .wkrow:hover { background: var(--accent-soft); }
+  .wkrow .bar { margin: 0; }
+  .wkrow .d { font-weight: 700; }
+  .wkrow .d small { display: block; font-weight: 500; color: var(--muted); font-size: .7rem; }
+  .wkrow .v { text-align: right; color: var(--muted); font-size: .82rem; }
+  .wkrow.hist { grid-template-columns: 104px 1fr 44px 28px; }
+  .wkrow.sel { background: var(--accent-soft); border-radius: 10px; }
+
+  /* Month */
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px; text-align: center; }
+  .stat b { display: block; font-size: 1.5rem; color: var(--accent); }
+  .stat span { font-size: .8rem; color: var(--muted); }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal .dh { text-align: center; font-size: .72rem; font-weight: 700; color: var(--muted); padding-bottom: 2px; }
+  .cell {
+    aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--accent) calc(var(--p, 0) * 0.8%), var(--card));
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: .85rem; font-weight: 600; cursor: pointer; padding: 0; color: var(--text); line-height: 1.1;
+  }
+  .cell:hover { color: var(--text); background: color-mix(in srgb, var(--accent) calc(var(--p, 0) * 0.8%), var(--card)); outline: 2px solid var(--accent); }
+  .cell small { font-size: .6rem; min-height: .8em; }
+  .cell.hi { color: #fff; }
+  .cell.hi:hover { color: #fff; }
+  .cell.off { opacity: .35; }
+  .cell.today { outline: 2px solid var(--today); }
+  .cell.blank { border: none; background: transparent; cursor: default; }
+  .legend { text-align: center; font-size: .75rem; color: var(--muted); margin-top: 8px; }
+
+  .actions { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 18px 0 8px; }
+  .row-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .note { color: var(--muted); font-size: .82rem; text-align: center; max-width: 520px; margin: 0; }
+
+  /* Together table */
+  .together { overflow-x: auto; }
+  .together table { width: 100%; border-collapse: collapse; min-width: 420px; }
+  .together th, .together td { padding: 10px 6px; text-align: center; border-bottom: 1px solid var(--border); font-size: .92rem; }
+  .together th:first-child, .together td:first-child { text-align: left; font-weight: 600; }
+  .together tr.today-row td:first-child { color: var(--today); }
+  .ca { color: var(--a); font-weight: 700; }
+  .cb { color: var(--b); font-weight: 700; }
+
+  /* Customize */
+  .hrow { border: 1px solid var(--border); border-radius: 14px; padding: 10px; margin: 10px 0; background: var(--card); }
+  .hline { display: flex; gap: 8px; align-items: center; }
+  .hrow input[type=text], .setrow input[type=number] {
+    font: inherit; padding: 8px 10px; border-radius: 10px; min-width: 0;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  }
+  .hrow .ico-in { width: 54px; text-align: center; font-size: 1.2rem; flex: none; }
+  .hrow .nm-in { flex: 1; }
+  .dys { display: flex; gap: 5px; margin: 8px 0; flex-wrap: wrap; }
+  .dys button { padding: 4px 0; width: 38px; font-size: .75rem; font-weight: 600; border-color: var(--border); color: var(--muted); }
+  .dys button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .mv { display: flex; gap: 6px; }
+  .mv button { padding: 4px 10px; font-size: .85rem; }
+  .setrow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+  .setrow input[type=number] { width: 70px; }
+  .muted { color: var(--muted); font-size: .85rem; }
+
+  /* Popups */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    display: none; align-items: center; justify-content: center; z-index: 50; padding: 20px;
+  }
+  .overlay.show { display: flex; }
+  .popup {
+    background: var(--card); color: var(--text); border-radius: 20px; padding: 24px;
+    max-width: 360px; width: 100%; text-align: center;
+    animation: pop .35s ease-out; box-shadow: 0 10px 40px rgba(0,0,0,.3);
+  }
+  .popup .big { font-size: 3.4rem; line-height: 1; }
+  .popup h3 { margin: 10px 0 6px; font-size: 1.3rem; }
+  .popup p { margin: 0 0 16px; color: var(--muted); }
+  .popup input[type=text] {
+    width: 100%; padding: 10px; font: inherit; border-radius: 10px; margin-bottom: 14px;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  }
+  .popup .row { display: flex; gap: 10px; justify-content: center; }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .confetti {
+    position: fixed; top: -40px; font-size: 1.6rem; z-index: 60; pointer-events: none;
+    animation: fall linear forwards;
+  }
+  @keyframes fall { to { transform: translateY(110vh) rotate(540deg); opacity: .9; } }
+
+  /* Background photo */
+  #bgLayer { position: fixed; inset: 0; z-index: -1; background-size: cover; background-position: center; display: none; }
+  #bgLayer::after { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 68%, transparent); }
+  .rename { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .syncchip { margin-top: 8px; }
+  .syncchip.live { border-color: var(--accent); background: var(--accent-soft); }
+  .popup { max-height: 90vh; overflow-y: auto; }
+  .popup .shareinput { font-size: .8rem; }
+</style>
+</head>
+<body>
+<div id="bgLayer"></div>
+<div class="wrap">
+  <header>
+    <h1>🌿 My Healthy Lifestyle</h1>
+    <p>Couple habit tracker • Bedtime 10:30 PM</p>
+    <button class="small syncchip" id="syncChip">☁️ Sync off – tap to set up</button>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="rename" id="renameWrap"></div>
+
+  <div id="view"></div>
+
+  <div class="actions" id="actions"></div>
+</div>
+
+<!-- celebration popup -->
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <div class="big" id="pEmoji">🏆</div>
+    <h3 id="pTitle"></h3>
+    <p id="pText"></p>
+    <button id="pClose" class="solid">Keep going 💪</button>
+  </div>
+</div>
+
+<!-- confirm / rename dialog -->
+<div class="overlay" id="dlg">
+  <div class="popup">
+    <h3 id="dTitle"></h3>
+    <p id="dText"></p>
+    <input type="text" id="dInput" maxlength="20" style="display:none">
+    <div class="row">
+      <button id="dNo">Cancel</button>
+      <button id="dYes" class="solid">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- sync dialog -->
+<div class="overlay" id="syncDlg"><div class="popup" id="syncBody"></div></div>
+<input type="file" id="photoIn" accept="image/*" style="display:none">
+
+<script>
+(function () {
+  var DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  var SHORT = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  var MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var MONFULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var DAYNOTE = { 6: "🏡 Free day – no office, household work" };
+  var ALL = [0,1,2,3,4,5,6], WK = [0,1,2,3,4,5], SUN = [6];
+  var KEY = "habit-tracker-v4";
+
+  // Weekly award levels (share of the week's habits completed)
+  var TIERS = [
+    null,
+    { cls: "silver", emoji: "🥈", label: "Silver",   min: 70 },
+    { cls: "gold",   emoji: "🥇", label: "Gold",     min: 90 },
+    { cls: "plat",   emoji: "💎", label: "Platinum", min: 100 }
+  ];
+
+  // ---------- dates ----------
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function toISO(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function fromISO(s) { var p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function addDays(iso, n) { var d = fromISO(iso); d.setDate(d.getDate() + n); return toISO(d); }
+  function wdOf(iso) { return (fromISO(iso).getDay() + 6) % 7; }
+  function mondayOf(iso) { return addDays(iso, -wdOf(iso)); }
+  function fmtDM(iso) { var d = fromISO(iso); return d.getDate() + " " + MON[d.getMonth()]; }
+  function fmtRange(mon) { return fmtDM(mon) + " – " + fmtDM(addDays(mon, 6)); }
+
+  var TODAY = toISO(new Date());
+  var THISMON = mondayOf(TODAY);
+  var MAXISO = addDays(THISMON, 6);
+
+  // ---------- defaults ----------
+  function defaultHabits() {
+    return [
+      { id: "wake",     icon: "⏰", name: "Wake up by 6:00 AM",                    days: WK.slice() },
+      { id: "wakesun",  icon: "⏰", name: "Wake up on time",                       days: SUN.slice() },
+      { id: "brush",    icon: "🪥", name: "Morning brushing",                      days: ALL.slice() },
+      { id: "exercise", icon: "🏃", name: "Exercise / walking",                    days: ALL.slice() },
+      { id: "bath",     icon: "🚿", name: "Bath and personal hygiene",             days: ALL.slice() },
+      { id: "prepB",    icon: "🍳", name: "Prepare breakfast",                     days: ALL.slice() },
+      { id: "eatB",     icon: "🥣", name: "Eat breakfast on time",                 days: ALL.slice() },
+      { id: "lunch",    icon: "🍱", name: "Pack / eat lunch",                      days: WK.slice() },
+      { id: "lunchsun", icon: "🍱", name: "Prepare / eat lunch on time",           days: SUN.slice() },
+      { id: "office",   icon: "💼", name: "Be productive at office",               days: WK.slice() },
+      { id: "chores",   icon: "🧹", name: "Household chores (cleaning, laundry)",  days: SUN.slice() },
+      { id: "water",    icon: "💧", name: "Drink enough water",                    days: ALL.slice() },
+      { id: "snack",    icon: "🍎", name: "Healthy evening snack",                 days: ALL.slice() },
+      { id: "dinner",   icon: "🍽️", name: "Eat dinner on time",                    days: ALL.slice() },
+      { id: "prepT",    icon: "🎒", name: "Prepare for tomorrow",                  days: WK.slice() },
+      { id: "mealprep", icon: "🛒", name: "Weekly meal prep & ready for Monday",   days: SUN.slice() },
+      { id: "nbrush",   icon: "🪥", name: "Night brushing",                        days: ALL.slice() },
+      { id: "sleep",    icon: "😴", name: "Sleep by 10:30 PM",                     days: ALL.slice() }
+    ];
+  }
+  var WEEK_ORDER = ["wake","brush","exercise","bath","prepB","eatB","lunch","office","water","snack","dinner","prepT","nbrush","sleep"];
+  var SUN_ORDER  = ["wakesun","brush","exercise","bath","prepB","eatB","lunchsun","chores","water","snack","dinner","mealprep","nbrush","sleep"];
+  function newId() { return "h" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+  function freshState() {
+    return {
+      version: 4,
+      names: { a: "Subu", b: "Hubby" }, photos: {}, active: "a", star: 10,
+      startDate: THISMON, lastSeen: THISMON,
+      announced: { a: {}, b: {} },
+      people: {
+        a: { habits: defaultHabits(), ticks: {} },
+        b: { habits: defaultHabits(), ticks: {} }
+      }
+    };
+  }
+
+  // ---------- migration from older versions ----------
+  function convertOld(oldData) {          // v1/v2: "dayIndex-habitIndex"
+    var ticks = {};
+    Object.keys(oldData || {}).forEach(function (k) {
+      var p = k.split("-"), d = +p[0], h = +p[1];
+      var id = (d === 6 ? SUN_ORDER : WEEK_ORDER)[h];
+      if (id) ticks[d + "|" + id] = 1;
+    });
+    return ticks;
+  }
+  function legacyWeekISO(ws) {
+    if (!ws) return THISMON;
+    var p = String(ws).split("-");
+    if (p.length !== 3) return THISMON;
+    return mondayOf(p[0] + "-" + pad(+p[1]) + "-" + pad(+p[2]));
+  }
+  function normalize(obj) {               // v3 ("dayIndex|habitId") → v4 ("date|habitId")
+    if (!obj || !obj.people || !obj.people.a || !obj.people.b) return null;
+    if (obj.version === 4) {
+      if (!obj.announced) obj.announced = { a: {}, b: {} };
+      if (!obj.startDate) obj.startDate = THISMON;
+      if (!obj.lastSeen) obj.lastSeen = THISMON;
+      if (!obj.star) obj.star = 10;
+      if (!obj.names) obj.names = { a: "Subu", b: "Hubby" };
+      if (obj.names.a === "Me") obj.names.a = "Subu";
+      if (!obj.photos) obj.photos = {};
+      ["a", "b"].forEach(function (w) {
+        if (!obj.people[w].ticks) obj.people[w].ticks = {};
+        if (!Array.isArray(obj.people[w].habits)) obj.people[w].habits = defaultHabits();
+      });
+      return obj;
+    }
+    var mon = legacyWeekISO(obj.weekStart);
+    var out = freshState();
+    if (obj.names) out.names = obj.names;
+    if (out.names.a === "Me") out.names.a = "Subu";
+    if (obj.star) out.star = obj.star;
+    out.startDate = mon;
+    out.lastSeen = mon;
+    ["a", "b"].forEach(function (w) {
+      var p = obj.people[w];
+      if (Array.isArray(p.habits)) out.people[w].habits = p.habits;
+      Object.keys(p.ticks || {}).forEach(function (k) {
+        var parts = k.split("|");
+        if (parts.length !== 2) return;
+        out.people[w].ticks[addDays(mon, +parts[0]) + "|" + parts[1]] = 1;
+      });
+    });
+    return out;
+  }
+
+  var state = null;
+  try { state = normalize(JSON.parse(localStorage.getItem(KEY))); } catch (e) {}
+  if (!state) {
+    try { state = normalize(JSON.parse(localStorage.getItem("habit-tracker-v3"))); } catch (e) {}
+  }
+  if (!state) {
+    try {
+      var v2 = JSON.parse(localStorage.getItem("habit-tracker-v2"));
+      if (v2 && v2.data) {
+        state = normalize({
+          names: v2.names, weekStart: v2.weekStart,
+          people: {
+            a: { habits: defaultHabits(), ticks: convertOld(v2.data.a) },
+            b: { habits: defaultHabits(), ticks: convertOld(v2.data.b) }
+          }
+        });
+      } else {
+        var v1 = JSON.parse(localStorage.getItem("habit-tracker-v1"));
+        if (v1) state = normalize({
+          people: {
+            a: { habits: defaultHabits(), ticks: convertOld(v1) },
+            b: { habits: defaultHabits(), ticks: {} }
+          }
+        });
+      }
+    } catch (e) {}
+  }
+  if (!state) state = freshState();
+  state.startDate = mondayOf(state.startDate);
+  if (state.active !== "a" && state.active !== "b" && state.active !== "both") state.active = "a";
+
+  // ---------- UI state (not saved) ----------
+  var view = "day";                 // day | week | month
+  var selISO = TODAY;               // selected date
+  var mY = fromISO(TODAY).getFullYear(), mM = fromISO(TODAY).getMonth();
+  var editing = false;
+  var slideDir = 0;
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function clampSel(iso) {
+    var lo = mondayOf(state.startDate);
+    if (iso > MAXISO) return MAXISO;
+    if (iso < lo) return lo;
+    return iso;
+  }
+  selISO = clampSel(selISO);
+
+  // ---------- calculations ----------
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function habitsOn(who, wd) {
+    return state.people[who].habits.filter(function (h) { return h.days.indexOf(wd) >= 0; });
+  }
+  function isTicked(who, iso, id) { return !!state.people[who].ticks[iso + "|" + id]; }
+  function dayStat(who, iso) {
+    var hs = habitsOn(who, wdOf(iso)), done = 0;
+    hs.forEach(function (h) { if (isTicked(who, iso, h.id)) done++; });
+    return { done: done, total: hs.length };
+  }
+  function goalFor(total) { return Math.min(state.star, total); }
+  function isStar(s) { return s.total > 0 && s.done >= goalFor(s.total); }
+  function isPerfect(s) { return s.total > 0 && s.done === s.total; }
+  function dayAward(s) {
+    if (isPerfect(s)) return "🏆 Perfect day!";
+    if (isStar(s)) return "⭐ Star day!";
+    return "";
+  }
+  function tierOf(done, total) {
+    if (!total) return 0;
+    if (done >= total) return 3;
+    var r = done / total * 100;
+    if (r >= 90) return 2;
+    if (r >= 70) return 1;
+    return 0;
+  }
+  function weekStats(who, mon) {
+    var done = 0, total = 0, stars = 0, perfect = 0, days = [];
+    for (var i = 0; i < 7; i++) {
+      var iso = addDays(mon, i), s = dayStat(who, iso);
+      done += s.done; total += s.total;
+      if (isStar(s)) stars++;
+      if (isPerfect(s)) perfect++;
+      days.push({ iso: iso, s: s });
+    }
+    return { done: done, total: total, pct: total ? Math.round(done / total * 100) : 0,
+             stars: stars, perfect: perfect, tier: tierOf(done, total), days: days };
+  }
+  function streaks(who) {
+    var st = [], iso;
+    for (iso = state.startDate; iso <= TODAY; iso = addDays(iso, 1)) {
+      var s = dayStat(who, iso);
+      st.push(s.total === 0 ? -1 : (isStar(s) ? 1 : 0));
+    }
+    var best = 0, run = 0, i;
+    for (i = 0; i < st.length; i++) {
+      if (st[i] === 1) { run++; if (run > best) best = run; }
+      else if (st[i] === 0) run = 0;
+    }
+    var cur = 0, j = st.length - 1;
+    if (j >= 0 && st[j] === 0) j--;        // today isn't over yet – don't break the streak
+    for (; j >= 0; j--) {
+      if (st[j] === 1) cur++;
+      else if (st[j] === 0) break;
+    }
+    return { cur: cur, best: best };
+  }
+  function coupleTier(mon) { return Math.min(weekStats("a", mon).tier, weekStats("b", mon).tier); }
+  function findHabit(who, id) {
+    var hs = state.people[who].habits;
+    for (var i = 0; i < hs.length; i++) if (hs[i].id === id) return i;
+    return -1;
+  }
+  function needMore(st) {
+    if (st.tier >= 3 || !st.total) return 0;
+    var nx = TIERS[st.tier + 1];
+    var target = nx.min >= 100 ? st.total : Math.ceil(nx.min / 100 * st.total - 1e-9);
+    return Math.max(0, target - st.done);
+  }
+
+  // ---------- celebration + dialog ----------
+  var overlay = document.getElementById("overlay");
+  function confetti() {
+    var bits = ["🎉", "⭐", "✨", "🎊", "💚", "🌟"];
+    for (var i = 0; i < 28; i++) {
+      var s = document.createElement("span");
+      s.className = "confetti";
+      s.textContent = bits[i % bits.length];
+      s.style.left = Math.random() * 100 + "vw";
+      s.style.animationDuration = (2 + Math.random() * 2.2) + "s";
+      s.style.animationDelay = (Math.random() * 0.6) + "s";
+      document.body.appendChild(s);
+      (function (el) { setTimeout(function () { el.remove(); }, 5200); })(s);
+    }
+  }
+  function celebrate(emoji, title, text) {
+    document.getElementById("pEmoji").textContent = emoji;
+    document.getElementById("pTitle").textContent = title;
+    document.getElementById("pText").textContent = text;
+    overlay.classList.add("show");
+    confetti();
+  }
+  document.getElementById("pClose").addEventListener("click", function () { overlay.classList.remove("show"); });
+  overlay.addEventListener("click", function (e) { if (e.target === overlay) overlay.classList.remove("show"); });
+
+  var dlg = document.getElementById("dlg");
+  var dInput = document.getElementById("dInput");
+  var dCb = null;
+  function openDialog(title, text, withInput, value, cb) {
+    document.getElementById("dTitle").textContent = title;
+    document.getElementById("dText").textContent = text;
+    dInput.style.display = withInput ? "block" : "none";
+    dInput.value = value || "";
+    dCb = cb;
+    dlg.classList.add("show");
+    if (withInput) setTimeout(function () { dInput.focus(); }, 50);
+  }
+  function closeDialog() { dlg.classList.remove("show"); dCb = null; }
+  document.getElementById("dNo").addEventListener("click", closeDialog);
+  document.getElementById("dYes").addEventListener("click", function () {
+    var cb = dCb, v = dInput.value;
+    closeDialog();
+    if (cb) cb(v);
+  });
+  dlg.addEventListener("click", function (e) { if (e.target === dlg) closeDialog(); });
+
+  // ---------- html pieces ----------
+  var tabsEl = document.getElementById("tabs");
+  var viewEl = document.getElementById("view");
+  var renameEl = document.getElementById("renameWrap");
+  var actionsEl = document.getElementById("actions");
+
+  function certHtml(name, st, mon) {
+    var t = TIERS[st.tier];
+    var more = needMore(st);
+    var nx = st.tier < 3 ? TIERS[st.tier + 1] : null;
+    var moreTxt = (nx && more > 0)
+      ? '<div class="c-more">' + more + ' more habit' + (more === 1 ? "" : "s") + ' to reach ' + nx.emoji + ' ' + nx.label + '</div>' : '';
+    if (!t) {
+      return '<div class="cert none"><div class="c-ico">🎯</div><div class="c-t">No medal yet</div>' +
+        '<div class="c-n">' + esc(name) + '</div><div class="c-s">Week of ' + fmtRange(mon) + ' • ' + st.pct + '%</div>' +
+        moreTxt + '</div>';
+    }
+    return '<div class="cert ' + t.cls + '"><div class="c-ico">' + t.emoji + '</div><div class="c-t">' + t.label + ' Award</div>' +
+      '<div class="c-n">' + esc(name) + '</div><div class="c-s">Week of ' + fmtRange(mon) + ' • ' + st.pct + '%</div>' + moreTxt + '</div>';
+  }
+  function weekNavHtml(mon) {
+    var lo = mondayOf(state.startDate);
+    var label = mon === THISMON ? "This week" : (addDays(mon, 7) === THISMON ? "Last week" : "Past week");
+    return '<div class="wknav"><button class="nav" data-wk="-1"' + (mon <= lo ? " disabled" : "") + ' aria-label="Previous week">‹</button>' +
+      '<div>' + fmtRange(mon) + '<small>' + label + '</small></div>' +
+      '<button class="nav" data-wk="1"' + (mon >= THISMON ? " disabled" : "") + ' aria-label="Next week">›</button></div>';
+  }
+  function segHtml() {
+    function b(v, l) { return '<button data-view="' + v + '" class="' + (view === v ? "active" : "") + '">' + l + '</button>'; }
+    return '<div class="seg">' + b("day", "Day") + b("week", "Week") + b("month", "Month") + '</div>';
+  }
+
+  function renderTabs() {
+    var act = state.active;
+    tabsEl.innerHTML =
+      '<button class="tab' + (act === "a" ? " active" : "") + '" data-tab="a">' + esc(state.names.a) + '</button>' +
+      '<button class="tab' + (act === "b" ? " active" : "") + '" data-tab="b">' + esc(state.names.b) + '</button>' +
+      '<button class="tab' + (act === "both" ? " active" : "") + '" data-tab="both">💑 Together</button>';
+    var hasPhoto = !!(state.photos && state.photos[act]);
+    renameEl.innerHTML = (act === "both" ? "" : '<button class="small" id="renameBtn">✏️ Rename "' + esc(state.names[act]) + '"</button>') +
+      '<button class="small" data-photo="set">📷 ' + (hasPhoto ? "Change" : "Set") + (act === "both" ? " couple" : "") + ' photo</button>' +
+      (hasPhoto ? '<button class="small" data-photo="clear">Remove photo</button>' : '');
+    var rb = document.getElementById("renameBtn");
+    if (rb) rb.addEventListener("click", function () {
+      openDialog("Rename", "Enter a name:", true, state.names[act], function (v) {
+        v = (v || "").trim();
+        if (v) { state.names[act] = v.slice(0, 20); save(); syncMisc(); render(); }
+      });
+    });
+  }
+
+  function renderActions() {
+    var a = state.active;
+    if (editing) { actionsEl.innerHTML = ""; return; }
+    var html = '<div class="row-btns">';
+    if (a !== "both") html += '<button data-act="customize">✏️ Customize habits</button>';
+    if (a !== "both" && view !== "month") {
+      html += '<button data-reset="' + a + '">Reset ' + esc(state.names[a]) + "'s week</button>";
+    }
+    if (a === "both" || view !== "month") html += '<button data-reset="both">Reset both</button>';
+    html += '</div><p class="note">Your history is kept week after week. Awards: ' +
+      TIERS[1].emoji + ' Silver ' + TIERS[1].min + '% • ' + TIERS[2].emoji + ' Gold ' + TIERS[2].min + '% • ' +
+      TIERS[3].emoji + ' Platinum 100% of the week\'s habits. Don\'t feel bad if you miss a few ticks. Just continue with the next habit.</p>';
+    actionsEl.innerHTML = html;
+  }
+
+  // ---------- Day view ----------
+  function renderDay(who) {
+    var mon = mondayOf(selISO), wd = wdOf(selISO);
+    var ws = weekStats(who, mon);
+    var hs = habitsOn(who, wd), s = dayStat(who, selISO);
+    var dpct = s.total ? Math.round(s.done / s.total * 100) : 0;
+    var future = selISO > TODAY;
+    var t = TIERS[ws.tier];
+
+    var html = segHtml() +
+      '<section class="card">' +
+        '<div class="top"><span class="pct">' + ws.pct + '%</span>' +
+        '<span class="count">Week: ' + ws.done + ' of ' + ws.total + ' habits</span></div>' +
+        '<div class="bar"><div style="width:' + ws.pct + '%"></div></div>' +
+        '<div class="awards-line">⭐ Star days (' + state.star + '+ habits): <strong>' + ws.stars + '/7</strong>' +
+        ' • ' + (t ? '<strong>' + t.emoji + ' ' + t.label + '</strong> this week' : 'No medal yet this week') + '</div>' +
+      '</section>';
+
+    html += '<div class="strip">';
+    ws.days.forEach(function (dd, i) {
+      var dn = fromISO(dd.iso).getDate();
+      html += '<button class="chip' + (dd.iso === selISO ? " active" : "") + (dd.iso === TODAY ? " today" : "") + (isStar(dd.s) ? " star" : "") +
+        '" data-chip="' + dd.iso + '">' + SHORT[i] + '<small>' + dn + '</small><small>' + (isStar(dd.s) ? "⭐" : dd.s.done + "/" + dd.s.total) + '</small></button>';
+    });
+    html += '</div>';
+
+    var cls = "card daycard" + (slideDir > 0 ? " from-right" : slideDir < 0 ? " from-left" : "");
+    slideDir = 0;
+    html += '<section class="' + cls + '" id="daycard">' +
+      '<div class="dayhead">' +
+        '<button class="nav" data-nav="-1"' + (clampSel(addDays(selISO, -1)) === selISO ? " disabled" : "") + ' aria-label="Previous day">‹</button>' +
+        '<h2>' + DAYS[wd] + (selISO === TODAY ? '<span class="today-tag">TODAY</span>' : '') + '<small>' + fmtDM(selISO) + '</small></h2>' +
+        '<button class="nav" data-nav="1"' + (clampSel(addDays(selISO, 1)) === selISO ? " disabled" : "") + ' aria-label="Next day">›</button>' +
+      '</div>' +
+      (DAYNOTE[wd] ? '<div class="daynote">' + DAYNOTE[wd] + '</div>' : '') +
+      '<div class="top" style="margin-top:8px"><span class="count">' + s.done + '/' + s.total + ' done</span><span class="count">' + dpct + '%</span></div>' +
+      '<div class="bar"><div style="width:' + dpct + '%"></div></div>' +
+      '<div class="dayaward">' + (future ? "🔒 This day opens on its date" : dayAward(s)) + '</div>';
+
+    if (!hs.length) {
+      html += '<div class="empty">No habits scheduled for this day.<br>Tap “Customize habits” to add some.</div>';
+    }
+    hs.forEach(function (h) {
+      var on = isTicked(who, selISO, h.id);
+      html += '<label class="habit' + (on ? " done" : "") + (future ? " locked" : "") + '"><input type="checkbox" data-id="' + esc(h.id) + '"' +
+        (on ? " checked" : "") + (future ? " disabled" : "") + '>' +
+        '<span class="ico">' + esc(h.icon || "•") + '</span><span class="nm">' + esc(h.name) + '</span></label>';
+    });
+    html += '<p class="hint">← swipe left or right to change day →</p></section>';
+    viewEl.innerHTML = html;
+  }
+
+  // ---------- Week view ----------
+  function renderWeek(who) {
+    var mon = mondayOf(selISO), ws = weekStats(who, mon);
+    var html = segHtml() + weekNavHtml(mon) + certHtml(state.names[who], ws, mon);
+
+    html += '<section class="card"><div class="top"><span class="pct">' + ws.pct + '%</span>' +
+      '<span class="count">' + ws.done + ' of ' + ws.total + ' habits • ⭐ ' + ws.stars + ' star days • 🏆 ' + ws.perfect + ' perfect</span></div>' +
+      '<div class="bar"><div style="width:' + ws.pct + '%"></div></div></section>';
+
+    html += '<h3 class="sec">Day by day</h3><section class="card" style="padding:6px 10px">';
+    ws.days.forEach(function (dd, i) {
+      var p = dd.s.total ? Math.round(dd.s.done / dd.s.total * 100) : 0;
+      html += '<div class="wkrow" data-go="' + dd.iso + '"><div class="d">' + SHORT[i] + '<small>' + fmtDM(dd.iso) + '</small></div>' +
+        '<div class="bar"><div style="width:' + p + '%"></div></div>' +
+        '<div class="v">' + dd.s.done + '/' + dd.s.total + '</div><div>' + (isPerfect(dd.s) ? "🏆" : isStar(dd.s) ? "⭐" : "") + '</div></div>';
+    });
+    html += '</section>';
+
+    // weekly history (last 8 weeks)
+    html += '<h3 class="sec">Weekly history</h3><section class="card" style="padding:6px 10px">';
+    var lo = mondayOf(state.startDate), m = THISMON, n = 0;
+    while (n < 8 && m >= lo) {
+      var h = weekStats(who, m), tt = TIERS[h.tier];
+      html += '<div class="wkrow hist' + (m === mon ? " sel" : "") + '" data-pickweek="' + m + '"><div class="d">' + fmtRange(m).replace(" – ", "–") + '</div>' +
+        '<div class="bar"><div style="width:' + h.pct + '%"></div></div><div class="v">' + h.pct + '%</div><div>' + (tt ? tt.emoji : "") + '</div></div>';
+      m = addDays(m, -7); n++;
+    }
+    html += '</section>';
+    viewEl.innerHTML = html;
+  }
+
+  // ---------- Month view ----------
+  function renderMonth(who) {
+    var firstISO = mY + "-" + pad(mM + 1) + "-01";
+    var daysIn = new Date(mY, mM + 1, 0).getDate();
+    var lead = wdOf(firstISO);
+    var lastISO = mY + "-" + pad(mM + 1) + "-" + pad(daysIn);
+
+    var done = 0, total = 0, stars = 0, perfect = 0;
+    var cells = "";
+    for (var i = 0; i < lead; i++) cells += '<div class="cell blank"></div>';
+    for (var d = 1; d <= daysIn; d++) {
+      var iso = mY + "-" + pad(mM + 1) + "-" + pad(d);
+      var s = dayStat(who, iso);
+      var counted = iso >= state.startDate && iso <= TODAY;
+      var p = s.total ? Math.round(s.done / s.total * 100) : 0;
+      if (counted) {
+        done += s.done; total += s.total;
+        if (isStar(s)) stars++;
+        if (isPerfect(s)) perfect++;
+      }
+      var off = iso < state.startDate || iso > TODAY;
+      cells += '<button class="cell' + (counted && p > 55 ? " hi" : "") + (off ? " off" : "") + (iso === TODAY ? " today" : "") +
+        '" style="--p:' + (counted ? p : 0) + '" data-go="' + iso + '">' + d + '<small>' + (counted ? (isPerfect(s) ? "🏆" : isStar(s) ? "⭐" : "") : "") + '</small></button>';
+    }
+    var mpct = total ? Math.round(done / total * 100) : 0;
+    var sk = streaks(who);
+
+    var minM = fromISO(state.startDate), nowD = fromISO(TODAY);
+    var prevOff = (mY < minM.getFullYear()) || (mY === minM.getFullYear() && mM <= minM.getMonth());
+    var nextOff = (mY > nowD.getFullYear()) || (mY === nowD.getFullYear() && mM >= nowD.getMonth());
+
+    var html = segHtml() +
+      '<div class="wknav"><button class="nav" data-mn="-1"' + (prevOff ? " disabled" : "") + ' aria-label="Previous month">‹</button>' +
+      '<div>' + MONFULL[mM] + ' ' + mY + '<small>' + esc(state.names[who]) + '</small></div>' +
+      '<button class="nav" data-mn="1"' + (nextOff ? " disabled" : "") + ' aria-label="Next month">›</button></div>' +
+      '<div class="stats">' +
+        '<div class="stat"><b>' + mpct + '%</b><span>Completed this month</span></div>' +
+        '<div class="stat"><b>⭐ ' + stars + ' · 🏆 ' + perfect + '</b><span>Star days · Perfect days</span></div>' +
+        '<div class="stat"><b>🔥 ' + sk.cur + '</b><span>Current star streak (days)</span></div>' +
+        '<div class="stat"><b>🏅 ' + sk.best + '</b><span>Best star streak (days)</span></div>' +
+      '</div>' +
+      '<section class="card"><div class="cal">';
+    SHORT.forEach(function (n) { html += '<div class="dh">' + n.charAt(0) + '</div>'; });
+    html += cells + '</div><div class="legend">Darker = more habits done • tap a day to open it</div></section>';
+
+    // weekly awards in this month
+    html += '<h3 class="sec">Weekly awards in ' + MONFULL[mM] + '</h3><section class="card" style="padding:6px 10px">';
+    var m = mondayOf(firstISO), any = false, lo = mondayOf(state.startDate);
+    while (m <= lastISO) {
+      if (m <= TODAY && addDays(m, 6) >= state.startDate && m >= lo) {
+        any = true;
+        var h = weekStats(who, m), tt = TIERS[h.tier];
+        html += '<div class="wkrow hist" data-pickweek="' + m + '"><div class="d">' + fmtRange(m).replace(" – ", "–") + '</div>' +
+          '<div class="bar"><div style="width:' + h.pct + '%"></div></div><div class="v">' + h.pct + '%</div><div>' + (tt ? tt.emoji : "") + '</div></div>';
+      }
+      m = addDays(m, 7);
+    }
+    if (!any) html += '<div class="empty">No weeks tracked in this month yet.</div>';
+    html += '</section>';
+    viewEl.innerHTML = html;
+  }
+
+  // ---------- Customize view ----------
+  function renderEdit(who) {
+    var p = state.people[who];
+    var html =
+      '<section class="card"><div class="top"><span class="count"><strong>Customize ' + esc(state.names[who]) + "'s habits</strong></span>" +
+      '<button class="solid small" data-act="done">Done</button></div>' +
+      '<p class="muted" style="margin:6px 0 0">Change the icon or name, choose which days each habit appears, reorder or delete. Changes save automatically and apply from now on.</p></section>';
+
+    p.habits.forEach(function (h, i) {
+      html += '<div class="hrow" data-hid="' + esc(h.id) + '">' +
+        '<div class="hline">' +
+          '<input type="text" class="ico-in" data-f="icon" maxlength="4" value="' + esc(h.icon) + '" aria-label="Icon">' +
+          '<input type="text" class="nm-in" data-f="name" maxlength="40" value="' + esc(h.name) + '" aria-label="Habit name">' +
+        '</div><div class="dys">';
+      for (var d = 0; d < 7; d++) {
+        html += '<button data-day="' + d + '" class="' + (h.days.indexOf(d) >= 0 ? "on" : "") + '">' + SHORT[d] + '</button>';
+      }
+      html += '</div><div class="mv">' +
+        '<button data-act="up"' + (i === 0 ? " disabled" : "") + ' aria-label="Move up">↑</button>' +
+        '<button data-act="down"' + (i === p.habits.length - 1 ? " disabled" : "") + ' aria-label="Move down">↓</button>' +
+        '<button data-act="del" aria-label="Delete">🗑 Delete</button>' +
+      '</div></div>';
+    });
+
+    html +=
+      '<div class="actions"><div class="row-btns"><button class="solid" data-act="add">＋ Add habit</button></div></div>' +
+      '<section class="card">' +
+        '<div class="setrow"><label for="starIn">⭐ Star day goal:</label>' +
+        '<input type="number" id="starIn" min="1" max="30" value="' + state.star + '"><span class="muted">habits in a day (applies to both of you)</span></div>' +
+        '<div class="row-btns" style="margin-top:10px">' +
+          '<button data-act="defaults">Restore default habits</button>' +
+          '<button data-act="export">⬇ Export backup</button>' +
+          '<button data-act="import">⬆ Import backup</button>' +
+        '</div>' +
+        '<input type="file" id="impFile" accept="application/json,.json" style="display:none">' +
+        '<p class="muted" style="margin:10px 0 0">Backup saves everything (both of you, all weeks) in a file. Use it to move your data to another phone.</p>' +
+      '</section>';
+    viewEl.innerHTML = html;
+  }
+
+  // ---------- Together view ----------
+  function renderBoth() {
+    var mon = mondayOf(selISO);
+    var A = weekStats("a", mon), B = weekStats("b", mon);
+    var ct = Math.min(A.tier, B.tier), t = TIERS[ct];
+    var html = weekNavHtml(mon) +
+      '<div class="certs">' + certHtml(state.names.a, A, mon) + certHtml(state.names.b, B, mon) + '</div>';
+
+    if (t) {
+      html += '<div class="cert couple"><div class="c-ico">💑' + t.emoji + '</div><div class="c-t">Couple Award • ' + t.label + '</div>' +
+        '<div class="c-n">' + esc(state.names.a) + ' &amp; ' + esc(state.names.b) + '</div>' +
+        '<div class="c-s">You both reached at least ' + t.label + ' this week!</div></div>';
+    } else {
+      html += '<div class="cert none"><div class="c-ico">💑</div><div class="c-t">Couple Award</div>' +
+        '<div class="c-s">Unlocks when you both reach ' + TIERS[1].emoji + ' Silver (' + TIERS[1].min + '%) or higher in the same week.</div></div>';
+    }
+
+    html += '<div class="card together"><table><thead><tr><th>Day</th>' +
+      '<th class="ca">' + esc(state.names.a) + '</th><th class="cb">' + esc(state.names.b) + '</th><th>Award</th></tr></thead><tbody>';
+    for (var i = 0; i < 7; i++) {
+      var iso = addDays(mon, i), x = A.days[i].s, y = B.days[i].s, aw = "";
+      if (isStar(x) && isStar(y)) aw = "💑 Power couple!";
+      else if (isStar(x)) aw = "⭐ " + esc(state.names.a);
+      else if (isStar(y)) aw = "⭐ " + esc(state.names.b);
+      html += '<tr' + (iso === TODAY ? ' class="today-row"' : '') + '><td>' + SHORT[i] + ' ' + fromISO(iso).getDate() + (i === 6 ? ' 🏡' : '') + (iso === TODAY ? ' •' : '') + '</td>' +
+        '<td class="ca">' + x.done + '/' + x.total + (isPerfect(x) ? ' 🏆' : '') + '</td>' +
+        '<td class="cb">' + y.done + '/' + y.total + (isPerfect(y) ? ' 🏆' : '') + '</td>' +
+        '<td>' + aw + '</td></tr>';
+    }
+    html += '</tbody></table></div>';
+    viewEl.innerHTML = html;
+  }
+
+  function render() {
+    applyBg();
+    renderTabs();
+    if (state.active === "both") { editing = false; renderBoth(); }
+    else if (editing) renderEdit(state.active);
+    else if (view === "week") renderWeek(state.active);
+    else if (view === "month") renderMonth(state.active);
+    else renderDay(state.active);
+    renderActions();
+  }
+
+  function goDay(delta) {
+    var nd = clampSel(addDays(selISO, delta));
+    if (nd === selISO) return;
+    slideDir = delta;
+    selISO = nd;
+    render();
+  }
+
+  // ---------- events ----------
+  tabsEl.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-tab]");
+    if (!t) return;
+    state.active = t.dataset.tab;
+    editing = false;
+    save();
+    render();
+  });
+
+  viewEl.addEventListener("change", function (e) {
+    var el = e.target;
+    var who = state.active;
+
+    if (el.id === "starIn") {
+      var v = parseInt(el.value, 10);
+      if (!isNaN(v)) { state.star = Math.max(1, Math.min(30, v)); save(); syncMisc(); }
+      return;
+    }
+    if (el.id === "impFile") {
+      var f = el.files && el.files[0];
+      if (!f) return;
+      var r = new FileReader();
+      r.onload = function () {
+        var obj = null;
+        try { obj = normalize(JSON.parse(r.result)); } catch (err) {}
+        if (!obj) { openDialog("Couldn't import", "That file isn't a valid habit tracker backup.", false, "", null); return; }
+        openDialog("Import backup?", "This replaces everything on this device with the backup file.", false, "", function () {
+          state = obj;
+          state.startDate = mondayOf(state.startDate);
+          state.active = "a";
+          state.lastSeen = THISMON;
+          editing = false;
+          selISO = clampSel(TODAY);
+          save(); render();
+          syncPushAll(true);
+        });
+      };
+      r.readAsText(f);
+      return;
+    }
+
+    if (!el.dataset || !el.dataset.id || who === "both" || el.disabled) return;
+    var id = el.dataset.id, key = selISO + "|" + id, mon = mondayOf(selISO);
+    var before = dayStat(who, selISO);
+    if (el.checked) state.people[who].ticks[key] = 1; else delete state.people[who].ticks[key];
+    var after = dayStat(who, selISO);
+    save();
+    syncTick(who, key, el.checked);
+    render();
+
+    var name = state.names[who], other = who === "a" ? "b" : "a";
+
+    // weekly award reached or upgraded?
+    var ws = weekStats(who, mon);
+    var prevRank = state.announced[who][mon] || 0;
+    if (ws.tier > prevRank) {
+      state.announced[who][mon] = ws.tier;
+      save();
+      syncAnnounced(who, mon, ws.tier);
+      var T = TIERS[ws.tier];
+      var otherT = weekStats(other, mon).tier;
+      var extra = otherT >= ws.tier ? " You both reached " + T.label + " — dream team! 💑" : "";
+      var msg = ws.tier === 3
+        ? "Every single habit done for the week of " + fmtRange(mon) + ". A perfect week!"
+        : ws.pct + "% of the habits done for the week of " + fmtRange(mon) + ". Keep going for the next medal!";
+      celebrate(T.emoji, T.label + " Award — " + name + "!", msg + extra);
+      return;
+    }
+
+    // day-level celebrations
+    var goal = goalFor(after.total);
+    if (before.done < goal && after.done >= goal) {
+      if (isStar(dayStat(other, selISO))) {
+        celebrate("💑", "Power couple day!", "You both hit your goal on " + DAYS[wdOf(selISO)] + ". Amazing teamwork!");
+      } else if (isPerfect(after)) {
+        celebrate("🏆", "Perfect day, " + name + "!", "Every habit done on " + DAYS[wdOf(selISO)] + ". You're building a lifestyle, not a challenge!");
+      } else {
+        celebrate("⭐", "Star day, " + name + "!", after.done + " habits done on " + DAYS[wdOf(selISO)] + ". Keep that momentum going!");
+      }
+    } else if (isPerfect(after) && before.done < before.total) {
+      celebrate("🏆", "Perfect day, " + name + "!", "Every habit done on " + DAYS[wdOf(selISO)] + ". You're building a lifestyle, not a challenge!");
+    }
+  });
+
+  viewEl.addEventListener("input", function (e) {
+    var el = e.target;
+    if (!el.dataset || !el.dataset.f) return;
+    var row = el.closest(".hrow");
+    if (!row) return;
+    var who = state.active;
+    var i = findHabit(who, row.dataset.hid);
+    if (i < 0) return;
+    var h = state.people[who].habits[i];
+    if (el.dataset.f === "icon") h.icon = el.value.slice(0, 4);
+    else h.name = el.value.slice(0, 40);
+    save();
+    syncHabits(who);
+  });
+
+  viewEl.addEventListener("click", function (e) {
+    var who = state.active;
+    var t;
+
+    if ((t = e.target.closest("[data-view]"))) { view = t.dataset.view; slideDir = 0; render(); return; }
+    if ((t = e.target.closest("[data-chip]"))) { slideDir = t.dataset.chip > selISO ? 1 : -1; selISO = clampSel(t.dataset.chip); render(); return; }
+    if ((t = e.target.closest("[data-nav]"))) { goDay(+t.dataset.nav); return; }
+    if ((t = e.target.closest("[data-wk]"))) { selISO = clampSel(addDays(selISO, 7 * +t.dataset.wk)); render(); return; }
+    if ((t = e.target.closest("[data-pickweek]"))) {
+      selISO = clampSel(t.dataset.pickweek);
+      if (view === "month") view = "week";
+      render(); window.scrollTo(0, 0); return;
+    }
+    if ((t = e.target.closest("[data-go]"))) {
+      selISO = clampSel(t.dataset.go);
+      view = "day"; slideDir = 0;
+      render(); window.scrollTo(0, 0); return;
+    }
+    if ((t = e.target.closest("[data-mn]"))) {
+      mM += +t.dataset.mn;
+      if (mM < 0) { mM = 11; mY--; }
+      if (mM > 11) { mM = 0; mY++; }
+      render(); return;
+    }
+    if (who === "both") return;
+
+    var row = e.target.closest(".hrow");
+    var hs = state.people[who].habits;
+
+    if ((t = e.target.closest("[data-day]")) && row) {
+      var i = findHabit(who, row.dataset.hid);
+      if (i < 0) return;
+      var day = +t.dataset.day, days = hs[i].days, at = days.indexOf(day);
+      if (at >= 0) days.splice(at, 1); else days.push(day);
+      days.sort(function (x, y) { return x - y; });
+      save(); syncHabits(who); render();
+      return;
+    }
+    if ((t = e.target.closest("[data-act]"))) {
+      var act = t.dataset.act;
+      if (act === "done") { editing = false; render(); return; }
+      if (act === "add") {
+        var nid = newId();
+        hs.push({ id: nid, icon: "✅", name: "New habit", days: ALL.slice() });
+        save(); syncHabits(who); render();
+        var fresh = viewEl.querySelector('.hrow[data-hid="' + nid + '"] .nm-in');
+        if (fresh) { fresh.scrollIntoView({ block: "center" }); fresh.focus(); fresh.select(); }
+        return;
+      }
+      if (act === "defaults") {
+        openDialog("Restore default habits?", "Your custom habits for " + state.names[who] + " will be replaced. Existing ticks stay for matching default habits.", false, "", function () {
+          state.people[who].habits = defaultHabits();
+          save(); syncHabits(who); render();
+        });
+        return;
+      }
+      if (act === "export") {
+        var blob = new Blob([JSON.stringify(state)], { type: "application/json" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "habit-tracker-backup.json";
+        document.body.appendChild(a); a.click(); a.remove();
+        return;
+      }
+      if (act === "import") { document.getElementById("impFile").click(); return; }
+      if (row) {
+        var k = findHabit(who, row.dataset.hid);
+        if (k < 0) return;
+        if (act === "up" && k > 0) { var tmp = hs[k - 1]; hs[k - 1] = hs[k]; hs[k] = tmp; save(); syncHabits(who); render(); }
+        else if (act === "down" && k < hs.length - 1) { var tmp2 = hs[k + 1]; hs[k + 1] = hs[k]; hs[k] = tmp2; save(); syncHabits(who); render(); }
+        else if (act === "del") {
+          openDialog("Delete habit?", "“" + hs[k].name + "” will be removed from " + state.names[who] + "'s list.", false, "", function () {
+            var j = findHabit(who, row.dataset.hid);
+            if (j >= 0) { hs.splice(j, 1); save(); syncHabits(who); render(); }
+          });
+        }
+      }
+    }
+  });
+
+  function clearWeek(who, mon) {
+    var t = state.people[who].ticks, removed = [];
+    for (var i = 0; i < 7; i++) {
+      var prefix = addDays(mon, i) + "|";
+      Object.keys(t).forEach(function (k) { if (k.indexOf(prefix) === 0) { delete t[k]; removed.push(k); } });
+    }
+    delete state.announced[who][mon];
+    syncRemoveTicks(who, removed);
+    syncAnnounced(who, mon, null);
+  }
+
+  actionsEl.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-act]");
+    if (t && t.dataset.act === "customize") { editing = true; render(); window.scrollTo(0, 0); return; }
+    var b = e.target.closest("[data-reset]");
+    if (!b) return;
+    var target = b.dataset.reset, mon = mondayOf(selISO);
+    var range = fmtRange(mon);
+    var msg = target === "both"
+      ? "This clears all ticks for both " + state.names.a + " and " + state.names.b + " for " + range + ". Other weeks and your habit lists stay."
+      : "This clears all ticks for " + state.names[target] + " for " + range + ". Other weeks and your habit list stay.";
+    openDialog("Reset this week?", msg, false, "", function () {
+      if (target === "both") { clearWeek("a", mon); clearWeek("b", mon); } else clearWeek(target, mon);
+      save(); render();
+    });
+  });
+
+  // swipe between days
+  var sx = 0, sy = 0, swiping = false;
+  viewEl.addEventListener("touchstart", function (e) {
+    swiping = !!e.target.closest("#daycard") && state.active !== "both" && !editing && view === "day";
+    if (!swiping) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, { passive: true });
+  viewEl.addEventListener("touchend", function (e) {
+    if (!swiping) return;
+    swiping = false;
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) goDay(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+  document.addEventListener("keydown", function (e) {
+    if (state.active === "both" || editing || view !== "day") return;
+    if (dlg.classList.contains("show") || overlay.classList.contains("show")) return;
+    var tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" && e.target.type !== "checkbox") return;
+    if (e.key === "ArrowLeft") goDay(-1);
+    else if (e.key === "ArrowRight") goDay(1);
+  });
+
+  // new day while the page stayed open
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && toISO(new Date()) !== TODAY) location.reload();
+  });
+
+  // ---------- background photos ----------
+  function applyBg() {
+    var el = document.getElementById("bgLayer");
+    var p = state.photos && state.photos[state.active];
+    if (p) { el.style.backgroundImage = 'url("' + p + '")'; el.style.display = "block"; }
+    else { el.style.display = "none"; el.style.backgroundImage = ""; }
+  }
+  function processPhoto(file, cb) {
+    var fr = new FileReader();
+    fr.onerror = function () { cb(null); };
+    fr.onload = function () {
+      var img = new Image();
+      img.onerror = function () { cb(null); };
+      img.onload = function () {
+        var max = 900, sc = Math.min(1, max / Math.max(img.width, img.height));
+        var c = document.createElement("canvas");
+        c.width = Math.max(1, Math.round(img.width * sc));
+        c.height = Math.max(1, Math.round(img.height * sc));
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        cb(c.toDataURL("image/jpeg", 0.7));
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+  renameEl.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-photo]");
+    if (!b) return;
+    if (b.dataset.photo === "set") { document.getElementById("photoIn").click(); return; }
+    var k = state.active;
+    delete state.photos[k];
+    save(); syncPhoto(k, null); render();
+  });
+  document.getElementById("photoIn").addEventListener("change", function (e) {
+    var f = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!f) return;
+    var k = state.active;
+    processPhoto(f, function (url) {
+      if (!url) { openDialog("Couldn't use that photo", "Please choose a JPG or PNG picture.", false, "", null); return; }
+      state.photos[k] = url;
+      save(); syncPhoto(k, url); render();
+    });
+  });
+
+  // ---------- cloud sync (Firebase Realtime Database, REST + live stream) ----------
+  var SYNCKEY = "habit-sync-v1", PKEY = "habit-pending-v1";
+  var syncCfg = null;
+  try { syncCfg = JSON.parse(localStorage.getItem(SYNCKEY)); } catch (e) {}
+  var pending = {};
+  try { pending = JSON.parse(localStorage.getItem(PKEY)) || {}; } catch (e) {}
+  var remote = {}, es = null, retryT = null, firstSync = true, unionOnce = false, syncState = "off";
+  var habitTimers = {}, hiddenAt = 0;
+
+  function savePending() { try { localStorage.setItem(PKEY, JSON.stringify(pending)); } catch (e) {} }
+  function setSyncState(st) {
+    syncState = st;
+    var txt = {
+      off: "☁️ Sync off – tap to set up", connecting: "☁️ Connecting…", live: "☁️ Synced",
+      offline: "☁️ Offline – will retry", error: "☁️ Sync problem – tap to check"
+    };
+    var chip = document.getElementById("syncChip");
+    chip.textContent = txt[st] || txt.off;
+    chip.className = "small syncchip" + (st === "live" ? " live" : "");
+    var el = document.getElementById("syncStatus");
+    if (el) el.textContent = "Status: " + (txt[st] || txt.off);
+  }
+  function failed() { if (syncState === "live") setSyncState("offline"); }
+  function validUrl(u) { return /^https:\/\/[a-z0-9.-]+\.(firebaseio\.com|firebasedatabase\.app)$/i.test(u); }
+  function dbBase() { return syncCfg.url + "/couples/" + encodeURIComponent(syncCfg.code); }
+  function dbReq(method, path, body) {
+    return fetch(dbBase() + path + ".json", {
+      method: method, headers: { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body)
+    });
+  }
+  function dbPatch(body) {
+    return dbReq("PATCH", "", body).then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r; });
+  }
+
+  function syncTick(who, key, on) {
+    if (!syncCfg) return;
+    var pk = who + "#" + key;
+    pending[pk] = on; savePending();
+    var body = {}; body["ticks/" + who + "/" + key] = on ? true : null;
+    dbPatch(body).then(function () {
+      setTimeout(function () { if (pending[pk] === on) { delete pending[pk]; savePending(); } }, 1500);
+    }).catch(failed);
+  }
+  function syncRemoveTicks(who, keys) {
+    if (!syncCfg || !keys.length) return;
+    var body = {};
+    keys.forEach(function (k) { pending[who + "#" + k] = false; body["ticks/" + who + "/" + k] = null; });
+    savePending();
+    dbPatch(body).then(function () {
+      setTimeout(function () {
+        keys.forEach(function (k) { if (pending[who + "#" + k] === false) delete pending[who + "#" + k]; });
+        savePending();
+      }, 1500);
+    }).catch(failed);
+  }
+  function syncAnnounced(who, mon, rank) {
+    if (!syncCfg) return;
+    var b = {}; b["announced/" + who + "/" + mon] = rank ? rank : null;
+    dbPatch(b).catch(failed);
+  }
+  function syncMisc() {
+    if (!syncCfg) return;
+    dbPatch({ "names/a": state.names.a, "names/b": state.names.b, star: state.star }).catch(failed);
+  }
+  function syncHabits(who) {
+    if (!syncCfg) return;
+    clearTimeout(habitTimers[who]);
+    habitTimers[who] = setTimeout(function () {
+      var b = {}; b["habits/" + who] = JSON.stringify(state.people[who].habits);
+      dbPatch(b).then(function () { habitTimers[who] = null; }).catch(failed);
+    }, 500);
+  }
+  function syncPhoto(k, url) {
+    if (!syncCfg) return;
+    (url ? dbReq("PUT", "/photos/" + k, url) : dbReq("DELETE", "/photos/" + k)).catch(failed);
+  }
+  function buildRemote() {
+    var o = { names: state.names, star: state.star, startDate: state.startDate, habits: {}, ticks: {}, announced: {}, photos: state.photos };
+    ["a", "b"].forEach(function (w) {
+      o.habits[w] = JSON.stringify(state.people[w].habits);
+      var t = {}; Object.keys(state.people[w].ticks).forEach(function (k) { t[k] = true; });
+      o.ticks[w] = t;
+      o.announced[w] = state.announced[w] || {};
+    });
+    return o;
+  }
+  function syncPushAll(replace) {
+    if (!syncCfg) return;
+    dbReq(replace ? "PUT" : "PATCH", "", buildRemote()).catch(failed);
+  }
+
+  function setIn(obj, parts, val) {
+    var o = obj;
+    for (var i = 0; i < parts.length - 1; i++) {
+      if (typeof o[parts[i]] !== "object" || o[parts[i]] === null) o[parts[i]] = {};
+      o = o[parts[i]];
+    }
+    var last = parts[parts.length - 1];
+    if (val === null || val === undefined) delete o[last]; else o[last] = val;
+  }
+  function typingInHabitRow() {
+    var a = document.activeElement;
+    return !!(a && a.closest && a.closest(".hrow"));
+  }
+
+  function mergeRemote(union) {
+    var r = remote, changed = false;
+    if (r.names) ["a", "b"].forEach(function (w) {
+      if (typeof r.names[w] === "string" && r.names[w] !== state.names[w]) { state.names[w] = r.names[w]; changed = true; }
+    });
+    if (typeof r.star === "number" && r.star !== state.star) { state.star = r.star; changed = true; }
+    if (typeof r.startDate === "string" && r.startDate < state.startDate) { state.startDate = mondayOf(r.startDate); changed = true; }
+    ["a", "b"].forEach(function (w) {
+      var rh = r.habits && r.habits[w];
+      if (typeof rh === "string" && !habitTimers[w] && !typingInHabitRow() && rh !== JSON.stringify(state.people[w].habits)) {
+        try { var arr = JSON.parse(rh); if (Array.isArray(arr)) { state.people[w].habits = arr; changed = true; } } catch (e) {}
+      }
+      var rt = (r.ticks && r.ticks[w]) || {}, lt = state.people[w].ticks;
+      Object.keys(rt).forEach(function (k) {
+        if (!lt[k] && pending[w + "#" + k] !== false) { lt[k] = 1; changed = true; }
+      });
+      if (!union) Object.keys(lt).forEach(function (k) {
+        if (!rt[k] && pending[w + "#" + k] === undefined) { delete lt[k]; changed = true; }
+      });
+      var ra = (r.announced && r.announced[w]) || {};
+      Object.keys(ra).forEach(function (mon) {
+        if ((state.announced[w][mon] || 0) < ra[mon]) { state.announced[w][mon] = ra[mon]; changed = true; }
+      });
+    });
+    if (r.photos) ["a", "b", "both"].forEach(function (k) {
+      if (typeof r.photos[k] === "string" && r.photos[k] !== state.photos[k]) { state.photos[k] = r.photos[k]; changed = true; }
+    });
+    return changed;
+  }
+  function reconcileUp() {
+    var r = remote, p = {}, any = false;
+    function put(k, v) { p[k] = v; any = true; }
+    ["a", "b"].forEach(function (w) {
+      if (!(r.names && typeof r.names[w] === "string")) put("names/" + w, state.names[w]);
+      if (!(r.habits && typeof r.habits[w] === "string")) put("habits/" + w, JSON.stringify(state.people[w].habits));
+      var rt = (r.ticks && r.ticks[w]) || {};
+      Object.keys(state.people[w].ticks).forEach(function (k) {
+        if (!rt[k] && pending[w + "#" + k] !== false) put("ticks/" + w + "/" + k, true);
+      });
+      var ra = (r.announced && r.announced[w]) || {};
+      Object.keys(state.announced[w] || {}).forEach(function (mon) {
+        if (!ra[mon]) put("announced/" + w + "/" + mon, state.announced[w][mon]);
+      });
+    });
+    if (typeof r.star !== "number") put("star", state.star);
+    if (!r.startDate || state.startDate < r.startDate) put("startDate", state.startDate);
+    ["a", "b", "both"].forEach(function (k) {
+      if (state.photos[k] && !(r.photos && r.photos[k])) put("photos/" + k, state.photos[k]);
+    });
+    if (any) dbPatch(p).catch(failed);
+  }
+  function flushPending() {
+    var b = {}, any = false;
+    Object.keys(pending).forEach(function (pk) {
+      var i = pk.indexOf("#");
+      b["ticks/" + pk.slice(0, i) + "/" + pk.slice(i + 1)] = pending[pk] ? true : null;
+      any = true;
+    });
+    ["a", "b"].forEach(function (w) { if (habitTimers[w]) syncHabits(w); });
+    if (any) dbPatch(b).then(function () { pending = {}; savePending(); }).catch(failed);
+  }
+
+  function onSyncEvent(ev, isPatch) {
+    var m;
+    try { m = JSON.parse(ev.data); } catch (e) { return; }
+    if (!m) return;
+    var parts = String(m.path || "/").split("/").filter(Boolean);
+    var root = parts.length === 0 && !isPatch;
+    if (root) remote = m.data || {};
+    else if (isPatch) Object.keys(m.data || {}).forEach(function (k) { setIn(remote, parts.concat(k.split("/")), m.data[k]); });
+    else setIn(remote, parts, m.data);
+    if (!root && !isPatch && parts[0] === "photos" && parts.length === 2 && m.data === null) delete state.photos[parts[1]];
+    setSyncState("live");
+
+    var empty = root && !remote.names && !remote.ticks && !remote.habits;
+    var union = root && firstSync && (unionOnce || empty);
+    var changed = mergeRemote(union);
+    if (root && firstSync) { firstSync = false; unionOnce = false; if (union) reconcileUp(); flushPending(); }
+    else if (root) flushPending();
+    if (changed) {
+      state.startDate = mondayOf(state.startDate);
+      selISO = clampSel(selISO);
+      save();
+      if (!typingInHabitRow()) render();
+    }
+  }
+  function stopSync() {
+    if (es) { var old = es; es = null; old.close(); }
+    clearTimeout(retryT);
+  }
+  function startSync(isRestart) {
+    if (!syncCfg) { setSyncState("off"); return; }
+    stopSync();
+    setSyncState("connecting");
+    remote = {};
+    firstSync = !isRestart;
+    var src;
+    try { src = new EventSource(dbBase() + ".json"); } catch (e) { setSyncState("error"); return; }
+    es = src;
+    src.addEventListener("put", function (ev) { onSyncEvent(ev, false); });
+    src.addEventListener("patch", function (ev) { onSyncEvent(ev, true); });
+    src.onerror = function () {
+      if (es !== src) return;
+      if (src.readyState === 2) {
+        setSyncState(navigator.onLine === false ? "offline" : "error");
+        clearTimeout(retryT);
+        retryT = setTimeout(function () { startSync(true); }, 8000);
+      } else {
+        setSyncState("offline");
+      }
+    };
+  }
+
+  // sync panel
+  var syncDlg = document.getElementById("syncDlg");
+  var syncBody = document.getElementById("syncBody");
+  function shareLink() {
+    var data = encodeURIComponent(btoa(JSON.stringify({ u: syncCfg.url, c: syncCfg.code })));
+    return location.origin + location.pathname + "#sync=" + data;
+  }
+  function renderSyncPanel() {
+    var h;
+    if (!syncCfg) {
+      h = '<h3>☁️ Sync your devices</h3>' +
+        '<p>Keep both trackers saved and in sync on every phone or laptop. Paste your Firebase database address (setup steps are in the README).</p>' +
+        '<input type="text" id="sUrl" placeholder="https://your-project-default-rtdb.region.firebasedatabase.app" autocomplete="off" autocapitalize="off">' +
+        '<input type="text" id="sCode" placeholder="Couple code – leave empty on the first device" autocomplete="off" autocapitalize="off">' +
+        '<p id="sMsg" style="color:#c0392b"></p>' +
+        '<div class="row"><button data-s="close">Close</button><button class="solid" data-s="connect">Connect</button></div>';
+    } else {
+      h = '<h3>☁️ Sync is on</h3><p id="syncStatus"></p>' +
+        '<p>Open this link on your other devices (phone, laptop, your husband\'s phone) to connect them. Keep it private – anyone with it can see and edit your tracker.</p>' +
+        '<input type="text" class="shareinput" id="sLink" readonly value="' + esc(shareLink()) + '">' +
+        '<p id="sMsg"></p>' +
+        '<div class="row" style="flex-wrap:wrap"><button class="solid" data-s="copy">Copy link</button><button data-s="disconnect">Disconnect</button><button data-s="close">Close</button></div>';
+    }
+    syncBody.innerHTML = h;
+    setSyncState(syncState);
+  }
+  function openSyncPanel() { renderSyncPanel(); syncDlg.classList.add("show"); }
+  document.getElementById("syncChip").addEventListener("click", openSyncPanel);
+  syncDlg.addEventListener("click", function (e) {
+    if (e.target === syncDlg) { syncDlg.classList.remove("show"); return; }
+    var b = e.target.closest("[data-s]");
+    if (!b) return;
+    var a = b.dataset.s, msg = document.getElementById("sMsg");
+    if (a === "close") { syncDlg.classList.remove("show"); return; }
+    if (a === "connect") {
+      var u = document.getElementById("sUrl").value.trim().replace(/\/+$/, "");
+      var c = document.getElementById("sCode").value.trim();
+      if (!validUrl(u)) { msg.textContent = "That doesn't look like a Firebase Realtime Database address (it ends in firebasedatabase.app or firebaseio.com)."; return; }
+      if (!c) {
+        var chars = "abcdefghijkmnpqrstuvwxyz23456789", arr = new Uint8Array(20);
+        (window.crypto || window.msCrypto).getRandomValues(arr);
+        for (var i = 0; i < arr.length; i++) c += chars.charAt(arr[i] % chars.length);
+      }
+      if (!/^[A-Za-z0-9_-]{8,64}$/.test(c)) { msg.textContent = "The couple code must be 8–64 letters or numbers."; return; }
+      syncCfg = { url: u, code: c };
+      try { localStorage.setItem(SYNCKEY, JSON.stringify(syncCfg)); } catch (err) {}
+      unionOnce = true;
+      startSync(false);
+      renderSyncPanel();
+      return;
+    }
+    if (a === "copy") {
+      var inp = document.getElementById("sLink");
+      var done = function () { msg.textContent = "Link copied ✔"; };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(inp.value).then(done, function () { inp.select(); });
+      else { inp.select(); try { document.execCommand("copy"); done(); } catch (err) {} }
+      return;
+    }
+    if (a === "disconnect") {
+      stopSync();
+      syncCfg = null;
+      try { localStorage.removeItem(SYNCKEY); } catch (err) {}
+      setSyncState("off");
+      renderSyncPanel();
+    }
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    if (syncCfg && (Date.now() - hiddenAt > 60000 || !es || es.readyState !== 1)) startSync(true);
+  });
+  function initSync() {
+    var joined = false, m = /#sync=([^&]+)/.exec(location.hash || "");
+    if (m) {
+      try {
+        var o = JSON.parse(atob(decodeURIComponent(m[1])));
+        if (validUrl(o.u) && /^[A-Za-z0-9_-]{8,64}$/.test(o.c)) {
+          syncCfg = { url: o.u, code: o.c };
+          try { localStorage.setItem(SYNCKEY, JSON.stringify(syncCfg)); } catch (err) {}
+          unionOnce = true; joined = true;
+        }
+      } catch (e) {}
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    }
+    setSyncState(syncCfg ? "connecting" : "off");
+    if (syncCfg) startSync(false);
+    if (joined) openDialog("Connected ☁️", "This device is now syncing with your couple tracker.", false, "", null);
+  }
+
+  // ---------- last week's awards recap (shown once when a new week starts) ----------
+  var recap = null;
+  if (state.lastSeen < THISMON) {
+    var lw = state.lastSeen;
+    var ra = weekStats("a", lw), rb = weekStats("b", lw);
+    function line(n, st) { var t = TIERS[st.tier]; return n + ": " + (t ? t.emoji + " " + t.label : "no medal") + " (" + st.pct + "%)"; }
+    recap = line(state.names.a, ra) + "  •  " + line(state.names.b, rb) + ". A fresh week starts now!";
+    recap = { text: recap, range: fmtRange(lw) };
+  }
+  state.lastSeen = THISMON;
+  save();
+
+  render();
+  initSync();
+  if (recap) celebrate("📅", "Awards for " + recap.range, recap.text);
+})();
+</script>
+</body>
+</html>
